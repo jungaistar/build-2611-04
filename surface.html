@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 그래프 작업실 — 삼각망 · 회귀 곡면 · 예측</title>
+<meta name="description" content="엑셀에서 복사한 표(독립변수 2개 · 종속변수 1개)를 붙여 넣으면 측정점 삼각망 면, 2차 회귀 곡면과 측정점, 회귀 곡면 위 예측점을 창 여러 개로 함께 보고 돌립니다. 뷰 동기화와 뷰 큐브 면 정렬.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://build-2611-04.jobability.co.kr/surface.html">
+<meta name="robots" content="index,follow">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<nav class="topnav" aria-label="주요 메뉴">
+  <div class="topnav-inner">
+    <a class="topnav-brand" href="index.html">계측 데이터 처리 · 3D 그래프 <small>build-2611-04 · 기획 노현석</small></a>
+    <ul class="topnav-links">
+      <li><a href="index.html">계측 처리</a></li>
+      <li><a href="surface.html" class="active" aria-current="page">3D 작업실</a></li>
+      <li><a href="guide.html">사용법</a></li>
+      <li><a href="plan.html">기획서</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">생성형 AI 업무자동화 전문가과정 · 2차수 · 프로젝트 04 · v1.1</div>
+  <h1>3D 그래프 작업실</h1>
+  <p>엑셀에서 표(독립변수 2개 · 종속변수 1개)를 복사해 붙여 넣으면 <b>측정점 삼각망 면</b>, <b>2차 회귀 곡면 + 측정점</b>, <b>회귀 곡면 위 예측점</b>을
+     창 여러 개로 함께 보고 돌립니다. 창끼리 <b>뷰 동기화</b>하거나 따로 움직이고, 그래프 구석의 <b>뷰 큐브</b> 면을 누르면 그 방향으로 정렬됩니다. 처리는 전부 이 브라우저 안에서 합니다.</p>
+</div></header>
+
+<main><div class="wrap">
+
+<section id="s-data" class="card">
+  <h2 style="margin-top:0">1. 데이터를 붙여 넣으세요</h2>
+  <p class="sub">엑셀에서 머리글을 포함한 범위를 복사(Ctrl+C)해 아래에 붙여 넣습니다(탭 · 쉼표 구분 모두 됩니다). 숫자가 아닌 칸(예: <code>Safe</code>)은 라벨로 받아 따로 보이고, 원하면 숫자로 바꿔 넣을 수 있습니다.</p>
+  <textarea id="paste" rows="6" placeholder="Mass	Height	Velocity Limit&#10;0	300	Safe&#10;700	1190	20&#10;…"></textarea>
+  <div class="btnrow">
+    <button class="btn primary" id="btn-paste" type="button">붙여 넣은 표 읽기</button>
+    <label class="btn">파일로 올리기(CSV · 엑셀)<input type="file" id="f-file" accept=".csv,.txt,.xlsx,.xls" style="display:none"></label>
+    <button class="btn" id="btn-sample" type="button">예제로 해보기(가짜 질량 × 높이 → 한계 속도)</button>
+    <button class="btn" id="btn-clear" type="button">비우기</button>
+  </div>
+  <div id="d-msg"></div>
+  <div class="ctrl" id="axes" hidden>
+    <label>X <select id="ax-x"></select></label>
+    <label>Y <select id="ax-y"></select></label>
+    <label>Z <select id="ax-z"></select></label>
+    <span id="label-box"></span>
+  </div>
+  <div id="d-info"></div>
+</section>
+
+<section id="s-fit" class="card" hidden>
+  <h2 style="margin-top:0">2. 회귀식 — z = a + b·x + c·y + d·x² + e·y² + f·x·y</h2>
+  <div id="fit-info"></div>
+  <details class="box"><summary>계수 직접 넣기(엑셀 회귀 계수가 있을 때)</summary>
+    <p class="sub">기획안의 계수 순서(f e d c b a)와 같은 이름입니다. 비우면 붙여 넣은 데이터로 다시 맞춥니다.</p>
+    <div class="coefs" id="coefs"></div>
+    <div class="btnrow"><button class="btn sm" id="btn-coef-apply" type="button">이 계수로 그리기</button><button class="btn sm" id="btn-coef-fit" type="button">데이터로 다시 맞추기</button><button class="btn sm" id="btn-formula-copy" type="button">회귀식 복사</button></div>
+  </details>
+  <div class="ctrl">
+    <label>예측 x <input type="text" id="px" inputmode="decimal" placeholder="예: 2100"></label>
+    <label>예측 y <input type="text" id="py" inputmode="decimal" placeholder="예: 2080"></label>
+    <button class="btn sm" id="btn-pred" type="button">예측점 표시</button>
+    <span id="pred-out"></span>
+  </div>
+</section>
+
+<section id="s-views" class="card" hidden>
+  <h2 style="margin-top:0">3. 그래프 창</h2>
+  <div class="ctrl">
+    <label class="chk"><input type="checkbox" id="sync" checked> 뷰 동기화(한 창을 돌리면 모두 같이)</label>
+    <label>색 <select id="cmap"><option value="viridis">viridis</option><option value="jet">jet</option><option value="coolwarm">coolwarm</option><option value="gray">gray</option></select></label>
+    <label>회귀 격자 <select id="grid"><option>20</option><option selected>30</option><option>45</option></select></label>
+    <button class="btn sm" id="btn-add" type="button">창 더하기</button>
+    <span class="sub">큐브: FRONT · REAR · LEFT · RIGHT · TOP · BOTTOM 면을 누르면 그 방향으로 정렬 · 끌어서 돌리기 · 휠로 확대</span>
+  </div>
+  <div id="panels" class="panels"></div>
+  <div class="btnrow"><button class="btn green" id="btn-xlsx" type="button">엑셀로 내보내기(점 · 회귀 계수 · 격자 · 잔차)</button></div>
+</section>
+
+<section class="card">
+  <h2 style="margin-top:0">이번 판에서 하지 않는 것</h2>
+  <ul class="ul">
+    <li>3차 이상 회귀 · 비선형 모델 — 2차 다항(계수 6개)까지입니다. 기획안의 계수를 그대로 넣어 그릴 수는 있습니다.</li>
+    <li>외부 그래프 라이브러리 — 캔버스에 직접 그립니다. 외부 서버 · CDN 없음.</li>
+    <li>라벨(Safe 등)의 뜻을 정하지 않습니다 — 숫자로 바꿀지, 뺄지는 사용자가 고릅니다.</li>
+  </ul>
+</section>
+
+</div></main>
+<footer><div class="wrap">생성형 AI 업무자동화 전문가과정 2차수 · 프로젝트 04 · 기획 노현석 · 예제는 가짜 데이터이며 실제 사내 데이터가 아닙니다.</div></footer>
+
+<script src="lib/xlsx.full.min.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/surface.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사용법 — 계측 데이터 처리 · 3D 그래프</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<nav class="topnav" aria-label="주요 메뉴">
+  <div class="topnav-inner">
+    <a class="topnav-brand" href="index.html">계측 데이터 처리 · 3D 그래프 <small>build-2611-04 · 기획 노현석</small></a>
+    <ul class="topnav-links">
+      <li><a href="index.html">도구</a></li>
+      <li><a href="surface.html">3D 작업실</a></li>
+      <li><a href="guide.html" class="active" aria-current="page">사용법</a></li>
+      <li><a href="plan.html">기획서</a></li>
+    </ul>
+  </div>
+</nav>
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">사용법</div>
+  <h1>계측기가 달라도 한 시간축으로 봅니다</h1>
+  <p>파일을 올리면 시간 형식을 스스로 읽고, 시작 시각과 신호 모양으로 두 번 맞춥니다. 계산은 전부 이 브라우저 안에서 끝나고 파일은 어디로도 올라가지 않습니다.</p>
+</div></header>
+<main><div class="wrap">
+<div class="card">
+  <h2 style="margin-top:0">1. 읽을 수 있는 파일</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>항목</th><th>읽는 방식</th></tr></thead>
+    <tbody>
+      <tr><td>형식</td><td>CSV·TXT(쉼표·세미콜론·탭 자동 판별), 엑셀(.xlsx — 시트마다 계측기 하나)</td></tr>
+      <tr><td>머리말</td><td>데이터 위의 설명 줄은 건너뜁니다. 그 안의 「Start Time」「측정 시작」 같은 줄에서 시작 시각을, 「Sample Rate 200 Hz」에서 샘플링 주기를 읽습니다.</td></tr>
+      <tr><td>시간 열</td><td>날짜+시각(2026-10-15 10:20:00.000), 시각만(10:20:00.250, 자정 넘김 처리), 경과 초·ms(열 이름의 단위로 판단), 시간 열 없음(샘플링 주기로 만듦)</td></tr>
+      <tr><td>채널</td><td>시간 열이 아닌 숫자 열. 열 이름 뒤 괄호·대괄호는 단위로 읽습니다(응력(MPa), Acc_Z [g]).</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub" style="margin-top:10px">잘못 읽었으면 파일 카드에서 시간 열·단위·시작 시각을 직접 고치세요. 직접 넣은 값은 「직접 입력」으로 표시됩니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">2. 동기화는 두 단계입니다</h2>
+  <p><b>① 시작 시각 맞춤.</b> 기준 파일의 시작을 0초로 두고, 다른 파일은 시작 시각 차이만큼 옮깁니다.
+  날짜 없이 시각만 있는 파일이 섞이면 시각끼리만 맞춥니다. 시작 시각이 없으면 0초에서 같이 시작한 것으로 보고 알려 줍니다.</p>
+  <p><b>② 지연 추정(교차상관).</b> 계측기 시계는 조금씩 어긋납니다. 기준 신호와 대상 신호를 같은 간격으로 옮긴 뒤,
+  대상을 앞뒤로 밀어 가며 두 신호가 가장 닮는 지점을 찾습니다. 그 거리가 지연이고, 닮은 정도가 r(최대 1)입니다.</p>
+  <ul style="margin:0 0 12px 20px">
+    <li>응력과 가속도처럼 물리량이 다르면 「크기 포락선」을 쓰세요. 느린 추세를 빼고 흔들림의 크기만 비교해 「충격이 온 때」를 맞춥니다.</li>
+    <li>같은 신호(공통 트리거·같은 센서)를 두 계측기가 함께 기록했다면 「원신호」가 가장 정확합니다.</li>
+    <li>r 이 낮거나 최대 지연 끝에서 값이 나오면 경고가 뜹니다. 「지연 보정 전후」 그래프로 봉우리가 겹치는지 눈으로 확인하세요.</li>
+    <li>추정한 지연은 계산값입니다. 화면·엑셀에 「추정」으로 표시됩니다. 알고 있는 값이 있으면 직접 넣으세요.</li>
+  </ul>
+  <p><b>③ 리샘플.</b> 공통 간격(기본: 가장 짧은 원래 간격)으로 선형 보간합니다. 원래 샘플이 공통 시각과 맞지 않는 채널은 「보간값」으로 표시됩니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">3. 전처리</h2>
+  <p>채널마다 원래 샘플에서 처리한 뒤 공통 시간축으로 옮깁니다. 순서는 이상치 찾기 → 보간으로 바꾸기(고른 경우) → 배율·오프셋 → 영점(앞 N초 평균 빼기) → 이동평균 → 저역통과입니다.</p>
+  <p>저역통과는 1차 필터를 앞→뒤, 뒤→앞으로 두 번 걸어 시간 지연이 생기지 않습니다. 지연이 생기는 필터는 동기화를 망칩니다.</p>
+  <p>이상치는 「앞뒤 점에서 혼자 튄 점」입니다. 충격 응답처럼 여러 점에 걸쳐 오르내리는 실제 신호는 잡지 않습니다. 기본은 표시만 하고, 고르면 앞뒤 값으로 보간해 바꿉니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">4. 내보내기</h2>
+  <p>엑셀에는 시트 5장이 들어갑니다 — 동기화데이터(공통축 초·절대 시각·채널), 처리이력(시작 시각 근거·지연과 근거), 채널통계, 이상치(원래 값), 요약. CSV 는 동기화 데이터만 담습니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">5. 3D 그래프</h2>
+  <p>X·Y(독립변수)와 Z(종속변수)를 고릅니다. 모든 X×Y 조합이 한 번씩 있는 시험 매트릭스는 측정값 그대로 곡면이 됩니다.
+  흩어진 점은 역거리 가중(IDW)으로 격자를 채웁니다. X·Y 단위가 달라도 범위로 나눠 거리를 잽니다. 채운 값은 측정값이 아니라 추정값입니다.</p>
+  <p>끌어서 돌리고 휠로 확대합니다. PNG 에는 색 막대와 곡면 종류(측정 격자 / IDW 보간)가 함께 들어갑니다.</p>
+</div>
+<div class="card">
+  <h2 style="margin-top:0">6. 이번 판에서 하지 않는 것</h2>
+  <ul style="margin-left:20px">
+    <li>구조물 수명평가(모재부·용접부)와 용접부 피로평가(IIW Recommendation · BS7608) — 계산 기준을 검증한 뒤 다음 판에서 다룹니다.</li>
+    <li>용접부 각장 설계 프로그램</li>
+    <li>계측기 전용 바이너리 형식 직접 읽기 — 계측 소프트웨어에서 CSV·엑셀로 내보내 올려 주세요.</li>
+  </ul>
+</div>
+<div class="card" id="g-surface">
+  <h2 style="margin-top:0">3D 작업실 (v1.1)</h2>
+  <p><a href="surface.html">3D 작업실</a>은 기획자가 보낸 그래프 3종(측정점을 삼각형 요소로 이은 면 · 회귀식으로 만든 곡면과 측정점 · 회귀 곡면에 독립변수 2개를 넣은 예측점)을 한 화면에서 창 여러 개로 봅니다.</p>
+  <ol style="margin-left:20px">
+    <li><b>붙여 넣기</b> — 엑셀에서 머리글 포함 범위를 복사해 붙여 넣습니다(탭 · 쉼표 · 공백 구분). 숫자가 아닌 칸(예: Safe)은 라벨로 받아 곡면에서는 빼고, 「Safe → 40」처럼 숫자를 적으면 그 값으로 넣습니다(빨간 테두리로 표시).</li>
+    <li><b>회귀식</b> — z = a + b·x + c·y + d·x² + e·y² + f·x·y 를 최소제곱으로 맞추고 R² · RMSE · 최대 잔차를 보입니다. 엑셀로 구한 계수(f e d c b a)가 있으면 직접 넣어 그릴 수 있습니다.</li>
+    <li><b>창</b> — 기본 세 창(삼각망 · 회귀+점 · 예측). 「창 더하기」로 늘리고 창마다 종류를 바꿉니다. 「뷰 동기화」가 켜져 있으면 한 창을 끌어 돌릴 때 모두 같이 돌고, 끄면 창마다 따로 움직입니다. 그래프 오른쪽 위 <b>뷰 큐브</b>의 면(FRONT · REAR · LEFT · RIGHT · TOP · BOTTOM)을 누르면 그 방향으로 정렬됩니다(머리의 단추로도 됩니다). 휠로 확대 · 축소, PNG 저장.</li>
+    <li><b>예측</b> — x · y 를 넣으면 회귀식 값을 계산해 예측 창에 빨간 점으로 표시합니다. 측정 범위 밖이면 「외삽」으로 알립니다.</li>
+    <li><b>엑셀</b> — 점(라벨 · 예측 · 잔차) · 회귀 계수 · 회귀 격자 · 예측 시트.</li>
+  </ol>
+  <p class="sub">면은 들로네 삼각분할(보간 없음), 곡면은 회귀식 값(계산)입니다. 외부 그래프 라이브러리 없이 캔버스에 직접 그립니다.</p>
+</div>
+</div></main>
+<footer><div class="wrap">생성형 AI 업무자동화 전문가과정 2차수 · 프로젝트 04 · 기획 노현석 · 예제 데이터는 실제 사내 데이터가 아닙니다.</div></footer>
+</body>
+</html>
