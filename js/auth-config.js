@@ -163,23 +163,20 @@ window.AUTH_CONFIG = {
     },
     "landing": {
       "company": {
-        "name": "HD건설기계",
-        "en": "HD CONSTRUCTION EQUIPMENT",
+        "name": "HD현대사이트솔루션",
+        "en": "HD HYUNDAI SITE SOLUTION",
         "logo": "images/logo.png",
         "logoH": 24
       },
       "slides": [
         {
-          "image": "images/slide-1.jpg"
-        },
-        {
-          "image": "images/slide-2.jpg"
-        },
-        {
-          "image": "images/slide-3.jpg"
+          "image": "images/slide-1.jpg",
+          "tone": "dark"
         }
       ],
-      "heroMode": "slide"
+      "heroMode": "slide",
+      "headline": "3D 그래프",
+      "lead": "독립변수 2개·종속변수 1개로 돌려 보는 3D 그래프를 만드는 도구입니다. 회귀함수 적용 표면과 함께 볼 수 있도록 구성한 그래프입니다."
     }
   }
 };

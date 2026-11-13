@@ -366,10 +366,19 @@
  "original": "\n[현재 직무] 산업차량 R&D에서 지게차 구조 내구 검증 업무 수행 - 구조해석 - 동역학 해석 - 실차 응력 계측 - 해석-시험 Correlation - 용접부 피로 평가 - 신뢰성 검증 [AI 자동화 목표] - 계측 데이터 자동 분석 - 보고서 자동 생성 [추가 개발 희망 프로그램] 1. 3D 그래프 생성 프로그램 - 독립변수 2개, 종속변수 1개 기반 시각화 2. 계측 데이터 Post-Processing 프로그램 - 서로 다른 계측기 데이터 Time Sync - Raw Data 전처리 자동화 3. 용접부 각장 설계 프로그램 4. 구조물 수명평가 프로그램 - 모재부 수명평가 - 용접부 수명평가 5. 용접부 피로평가 프로그램 - IIW Recommendation - BS7608 기반 자동 평가\n",
  "landing": {
   "company": {
-   "name": "HD건설기계",
-   "en": "HD CONSTRUCTION EQUIPMENT",
+   "name": "HD현대사이트솔루션",
+   "en": "HD HYUNDAI SITE SOLUTION",
    "logo": "images/logo.png",
    "logoH": 24
-  }
+  },
+  "slides": [
+   {
+    "image": "images/slide-1.jpg",
+    "tone": "dark"
+   }
+  ],
+  "heroMode": "slide",
+  "headline": "3D 그래프",
+  "lead": "독립변수 2개·종속변수 1개로 돌려 보는 3D 그래프를 만드는 도구입니다. 회귀함수 적용 표면과 함께 볼 수 있도록 구성한 그래프입니다."
  }
 }
