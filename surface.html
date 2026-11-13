@@ -6,10 +6,16 @@
 <title>3D 그래프 작업실 — 삼각망 · 회귀 곡면 · 예측</title>
 <meta name="description" content="엑셀에서 복사한 표(독립변수 2개 · 종속변수 1개)를 붙여 넣으면 측정점 삼각망 면, 2차 회귀 곡면과 측정점, 회귀 곡면 위 예측점을 창 여러 개로 함께 보고 돌립니다. 뷰 동기화와 뷰 큐브 면 정렬.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="canonical" href="https://build-2611-04.jobability.co.kr/surface.html">
+<link rel="canonical" href="https://aebonlee.github.io/build-2611-04/surface.html">
 <meta name="robots" content="index,follow">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/app.css">
+<!-- auth-kit: 로그인 전에는 도구 화면을 감춘다(js/auth.js 가 판정 뒤 푼다) -->
+<script>document.documentElement.classList.add('auth-lock')</script>
+<link rel="stylesheet" href="css/auth.css?v=2026-11-13.1">
+<link rel="stylesheet" href="css/board.css?v=2026-11-13.1">
+<link rel="stylesheet" href="css/kit-build.css?v=2026-11-13.1">
+<!-- /auth-kit -->
 </head>
 <body>
 <nav class="topnav" aria-label="주요 메뉴">
@@ -97,5 +103,12 @@
 <script src="lib/xlsx.full.min.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/surface.js"></script>
+<!-- auth-kit: 로그인 · 사용 신청 · 승인 · 게시판(키트 정본 data10-00/kit/auth, 적용 build-2611-00/tools/kit) -->
+<script src="vendor/supabase.js?v=2026-11-13.1"></script>
+<script src="js/auth-config.js?v=2026-11-13.1"></script>
+<script src="js/kit-build.js?v=2026-11-13.1"></script>
+<script src="js/board.js?v=2026-11-13.1"></script>
+<script src="js/auth.js?v=2026-11-13.1"></script>
+<!-- /auth-kit -->
 </body>
 </html>
